@@ -3,12 +3,12 @@ const path = require('path');
 const http = require('http');
 const https = require('https');
 const fs = require('fs');
-
+const os = require('os');
 // var indexRouter = require('./routes/index');
 // var usersRouter = require('./routes/users');
 var options = {
-	key: fs.readFileSync('~/cert/cert.pem'),
-	cert: fs.readFileSync('~/cert/cert.key')
+	key: fs.readFileSync(path.join(os.homedir(),'./cert/cert.pem')),
+	cert: fs.readFileSync(path.join(os.homedir(),'~/cert/cert.key'))
 }
 const app = express();
 const httpServer = http.createServer(app);
