@@ -1,0 +1,17 @@
+{
+  "name": "raspberry",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "express": "~4.16.0"
+  },
+  "devDependencies": {
+    "gulp": "^4.0.0",
+    "gulp-nodemon": "^2.2.1",
+    "gulp-scp2": "^0.2.0",
+    "gulp-ssh": "^0.7.0"
+  }
+}
