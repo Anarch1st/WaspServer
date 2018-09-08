@@ -7,8 +7,8 @@ const fs = require('fs');
 // var indexRouter = require('./routes/index');
 // var usersRouter = require('./routes/users');
 var options = {
-	key: fs.readFileSync('./cert/cert.pem'),
-	cert: fs.readFileSync('./cert/cert.key')
+	key: fs.readFileSync('~/cert/cert.pem'),
+	cert: fs.readFileSync('~/cert/cert.key')
 }
 const app = express();
 const httpServer = http.createServer(app);
