@@ -1,22 +1,17 @@
 const express = require('express');
 const path = require('path');
 const http = require('http');
-const https = require('https');
 const fs = require('fs');
-const os = require('os');
+
 // var indexRouter = require('./routes/index');
 // var usersRouter = require('./routes/users');
-var options = {
-	key: fs.readFileSync(path.join(os.homedir(),'./cert/cert.pem')),
-	cert: fs.readFileSync(path.join(os.homedir(),'./cert/cert.key'))
-}
+
 const app = express();
 const httpServer = http.createServer(app);
-const httpsServer = http.createServer(options, app);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use('/',express.static(path.join(__dirname, '../public')));
+app.use('/',express.static(path.join(__dirname, '../public')))
 
 // app.use('/', indexRouter);
 // app.use('/users', usersRouter);
@@ -26,6 +21,6 @@ app.use('/',express.static(path.join(__dirname, '../public')));
 // 	res.send("hello world");
 // });
 
-httpsServer.listen(process.env.PORT || 8000, function() {
-	console.log("Server started on port: "+httpsServer.address().port);
+httpServer.listen(process.env.PORT || 8000, function() {
+	console.log("Server started on port: "+httpServer.address().port);
 });
