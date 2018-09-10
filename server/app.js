@@ -66,7 +66,9 @@ passport.deserializeUser(function(id, cb) {
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.post('/login', passport.authenticate('local', {failureFlase: true}), function(req, res){
+app.post('/login',
+ passport.authenticate('local', {failureFlase: true}),
+ function(req, res){
 	res.send("Hello "+req.user.username);
 });
 
@@ -74,16 +76,13 @@ app.get('/logout', function(req, res) {
 	req.logout();
 	res.send("Logout");
 });
-// app.use('/', indexRouter);
-// app.use('/users', usersRouter);
 
-// catch 404 and forward to error handler
-// app.get('/', function(req, res){
-// 	res.send("hello world");
-// });
 app.get('/profile',ensureLoggedIn.ensureLoggedIn('/login'), function(req, res){
 	res.send(req.user);
 });
+
+const indexRouter = require('./routes/index');
+app.use('/', indexRouter);
 
 httpServer.listen(process.env.PORT || 8000, function() {
 	console.log("Server started on port: "+httpServer.address().port);
