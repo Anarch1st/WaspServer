@@ -15,15 +15,22 @@ const Users = require('./data/repo/users');
 
 const app = express();
 const httpServer = http.createServer(app);
+const sessionOptions = {
+	secret: "WaspberrySpeaking",
+	resave: false,
+	saveUninitialized: false,
+	cookie: {}
+};
 
-app.set('trust-proxy', 1);
+if(process.env.NODE_ENV === "production") {
+	app.set('trust-proxy', 1);
+	sessionOptions.cookie.secure = true;
+	app.use(require('compression'));
+}
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(session({secret: "WaspberrySpeaking",
-				 resave: false,
-				 saveUninitialized: false,
-				 cookie: {secure: true}}));
+app.use(session(sessionOptions));
 app.use(express.urlencoded({ extended: false }));
 app.use('/',express.static(path.join(__dirname, '../public')));
 
