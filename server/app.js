@@ -24,15 +24,15 @@ const sessionOptions = {
 
 if(process.env.NODE_ENV === "production") {
 	const FileStore = require('session-file-store')(session);
-	app.set('trust-proxy', 1);
+	app.set('trust proxy', 1);
 	sessionOptions.cookie.secure = true;
-	sessionOptions.store = new FileStore({secret: "WaspberrySpeaking"});
-	app.use(require('compression'));
+	sessionOptions.store = new FileStore();
+	//app.use(require('compression'));
 }
 
 app.use(express.json());
 app.use(session(sessionOptions));
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use('/',express.static(path.join(__dirname, '../public')));
 
 passport.use(new LocalStrategy(function(username, password, done){
@@ -64,7 +64,6 @@ var optionalAuth = function(req, res, next) {
 
 app.post('/login',
  passport.authenticate('local', {
-	 successReturnToOrRedirect: '/',
 	 failureRedirect: '/login',
 	 failureFlase: true
  }),

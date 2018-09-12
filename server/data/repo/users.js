@@ -3,8 +3,6 @@ const jsonfile = require('jsonfile');
 const crypto = require('crypto');
 
 const usersFile = path.resolve(__dirname, "../db/user-db.json");
-const sha512 = crypto.createHash('sha512');
-const md5 = crypto.createHash('md5');
 
 function authenticate(username, password) {
 	console.log(username);
@@ -42,6 +40,10 @@ function findByUsername(username, password, done) {
 }
 
 function verifyPassword(user, password) {
+	const sha512 = crypto.createHash('sha512');
+	const md5 = crypto.createHash('md5');
+
+
 	const s1 = sha512.update(password).digest('hex');
 	const s2 = md5.update(s1).digest('hex');
 	
