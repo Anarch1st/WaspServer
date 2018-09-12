@@ -26,15 +26,26 @@ function authenticate(username, password) {
 	});
 }
 
-function findByUsername(username, cb) {
+function findByUsername(username, password, done) {
 	jsonfile.readFile(usersFile, function(err, obj) {
 		for (var i = 0; i < obj.length; i++) {
 			if (obj[i].username === username) {
-				cb(obj[i]);
+				if (verifyPassword(obj[i], password)) {
+					return done(null, obj[i]);
+				} else {
+					return done(null, false, {message: "Incorrect Password"});
+				}
 			}
 		}
-		cb(null);
+		return done(null, false, {message: "User not found"});
 	});
+}
+
+function verifyPassword(user, password) {
+	const s1 = sha512.update(password).digest('hex');
+	const s2 = md5.update(s1).digest('hex');
+	
+	return s2===user.password;
 }
 
 function findById(id, cb) {
