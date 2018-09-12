@@ -3,9 +3,7 @@ const path = require('path');
 const http = require('http');
 const fs = require('fs');
 const passport = require('passport');
-const cookieParser = require('cookie-parser');
 const session = require('express-session');
-const ensureLoggedIn = require('connect-ensure-login');
 const LocalStrategy = require('passport-local').Strategy;
 const Users = require('./data/repo/users');
 // const Users = require(path.resolve(__dirname,'./repo/users.js'));
@@ -27,7 +25,7 @@ if(process.env.NODE_ENV === "production") {
 	app.set('trust proxy', 1);
 	sessionOptions.cookie.secure = true;
 	sessionOptions.store = new FileStore();
-	//app.use(require('compression'));
+	app.use(require('compression')());
 }
 
 app.use(express.json());
@@ -62,13 +60,23 @@ var optionalAuth = function(req, res, next) {
   })(req, res, next);
 };
 
+app.use("*", function(req, res, next) {
+	console.log(req.ip+"\t"+(req.hasOwnProperty('user'))+"\t"+req.originalUrl);
+	next();
+});
+
 app.post('/login',
  passport.authenticate('local', {
 	 failureRedirect: '/login',
 	 failureFlase: true
  }),
  function(req, res){
-	res.send("Hello "+req.user.username);
+	 if (req.session.returnTo) {
+		 res.redirect(req.session.returnTo);
+		 delete req.session.returnTo;
+	 } else {
+		 res.send("Hello "+req.user.username);
+	 }
 });
 
 app.get('/logout',optionalAuth, function(req, res) {
@@ -80,8 +88,13 @@ app.get('/logout',optionalAuth, function(req, res) {
 	res.send(text);
 });
 
-app.get('/profile',ensureLoggedIn.ensureLoggedIn('/login'), function(req, res){
-	res.send(req.user);
+app.get('/profile',optionalAuth, function(req, res){
+	if (req.user) {
+		res.send(req.user);
+	} else {
+		req.session.returnTo = req.path;
+		res.redirect('/login');
+	}
 });
 
 const indexRouter = require('./routes/index');
