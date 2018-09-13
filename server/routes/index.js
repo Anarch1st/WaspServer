@@ -21,7 +21,7 @@ router.get('/test', function(req, res){
 });
 
 router.get('/testCI', function(req, res) {
-	const commitLog = execSync('git log -n 1');
+	const commitLog = execSync('git log -n 1').toString('utf8');
 	res.send(commitLog);
 });
 
