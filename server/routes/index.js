@@ -23,6 +23,6 @@ router.get('/test', function(req, res){
 router.get('/testCI', function(req, res) {
 	const commitLog = execSync('git log -n 1');
 	res.send(commitLog);
-})
+});
 
 module.exports = router;
