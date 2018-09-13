@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const router = express.Router();
+const { execSync } = require('child_process');
 
 /* GET home page. */
 router.get('/', function(req, res) {
@@ -18,5 +19,10 @@ router.get('/test', function(req, res){
 	  res.send("Not logged in");
   }
 });
+
+router.get('/testCI', function(req, res) {
+	const commitLog = execSync('git log -n 1');
+	res.send(commitLog);
+})
 
 module.exports = router;
