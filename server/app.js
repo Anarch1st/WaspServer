@@ -88,6 +88,10 @@ app.get('/logout',optionalAuth, function(req, res) {
 	res.send(text);
 });
 
+app.get('/login', function(req, res) {
+	res.sendFile(path.resolve(__dirname, '../public/login.html'));
+});
+
 app.get('/profile',optionalAuth, function(req, res){
 	if (req.user) {
 		res.send(req.user);
