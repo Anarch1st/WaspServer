@@ -3,9 +3,7 @@ const path = require('path');
 const http = require('http');
 const fs = require('fs');
 const passport = require('passport');
-const cookieParser = require('cookie-parser');
 const session = require('express-session');
-const ensureLoggedIn = require('connect-ensure-login');
 const LocalStrategy = require('passport-local').Strategy;
 const Users = require('./data/repo/users');
 // const Users = require(path.resolve(__dirname,'./repo/users.js'));
@@ -23,29 +21,20 @@ const sessionOptions = {
 };
 
 if(process.env.NODE_ENV === "production") {
-	app.set('trust-proxy', 1);
+	const FileStore = require('session-file-store')(session);
+	app.set('trust proxy', 1);
 	sessionOptions.cookie.secure = true;
-	app.use(require('compression'));
+	sessionOptions.store = new FileStore();
+	app.use(require('compression')());
 }
 
 app.use(express.json());
-app.use(cookieParser());
 app.use(session(sessionOptions));
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use('/',express.static(path.join(__dirname, '../public')));
 
 passport.use(new LocalStrategy(function(username, password, done){
-	Users.findByUsername(username, function(user) {
-		if (user) {
-			if (user.password === password) {
-				return done(null, user);
-			} else {
-				return done(null, false, {message: "Incorrect Password"});
-			}
-		} else {
-			return done(null, false, {message: "User not found"});
-		}
-	});
+	Users.findByUsername(username, password, done);
 }));
 
 passport.serializeUser(function(user, cb) {
@@ -62,27 +51,54 @@ passport.deserializeUser(function(id, cb) {
 	});
 });
 
-
 app.use(passport.initialize());
 app.use(passport.session());
 
+var optionalAuth = function(req, res, next) {
+  passport.authenticate('local', function(err, user, info) {
+    next();
+  })(req, res, next);
+};
+
+app.use("*", function(req, res, next) {
+	console.log(req.ip+"\t"+(req.hasOwnProperty('user'))+"\t"+req.originalUrl);
+	next();
+});
+
 app.post('/login',
- passport.authenticate('local', {failureFlase: true}),
+ passport.authenticate('local', {
+	 failureRedirect: '/login',
+	 failureFlase: true
+ }),
  function(req, res){
-	res.send("Hello "+req.user.username);
+	 if (req.session.returnTo) {
+		 res.redirect(req.session.returnTo);
+		 delete req.session.returnTo;
+	 } else {
+		 res.send("Hello "+req.user.username);
+	 }
 });
 
-app.get('/logout', function(req, res) {
+app.get('/logout',optionalAuth, function(req, res) {
+	var text = "Logout";
+	if (req.user) {
+		text = text + " "+req.user.username;
+	}
 	req.logout();
-	res.send("Logout");
+	res.send(text);
 });
 
-app.get('/profile',ensureLoggedIn.ensureLoggedIn('/login'), function(req, res){
-	res.send(req.user);
+app.get('/profile',optionalAuth, function(req, res){
+	if (req.user) {
+		res.send(req.user);
+	} else {
+		req.session.returnTo = req.path;
+		res.redirect('/login');
+	}
 });
 
 const indexRouter = require('./routes/index');
-app.use('/', indexRouter);
+app.use('/', optionalAuth, indexRouter);
 
 httpServer.listen(process.env.PORT || 8000, function() {
 	console.log("Server started on port: "+httpServer.address().port);
