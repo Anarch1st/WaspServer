@@ -31,6 +31,7 @@ if(process.env.NODE_ENV === "production") {
 app.use(express.json());
 app.use(session(sessionOptions));
 app.use(express.urlencoded({ extended: true }));
+// app.use('/node_modules', express.static(path.join(__dirname, '../node_modules')));
 app.use('/',express.static(path.join(__dirname, '../public')));
 
 passport.use(new LocalStrategy(function(username, password, done){
@@ -60,11 +61,6 @@ var optionalAuth = function(req, res, next) {
   })(req, res, next);
 };
 
-app.use("*", function(req, res, next) {
-	console.log(req.ip+"\t"+(req.hasOwnProperty('user'))+"\t"+req.originalUrl);
-	next();
-});
-
 app.post('/login',
  passport.authenticate('local', {
 	 failureRedirect: '/login',
@@ -88,6 +84,10 @@ app.get('/logout',optionalAuth, function(req, res) {
 	res.send(text);
 });
 
+app.get('/login', function(req, res) {
+	res.sendFile(path.resolve(__dirname, '../public/login.html'));
+});
+
 app.get('/profile',optionalAuth, function(req, res){
 	if (req.user) {
 		res.send(req.user);
@@ -95,6 +95,11 @@ app.get('/profile',optionalAuth, function(req, res){
 		req.session.returnTo = req.path;
 		res.redirect('/login');
 	}
+});
+
+app.use("*", function(req, res, next) {
+	console.log(req.ip+"\t"+(req.hasOwnProperty('user'))+"\t"+req.originalUrl);
+	next();
 });
 
 const indexRouter = require('./routes/index');

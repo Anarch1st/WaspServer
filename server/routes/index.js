@@ -1,28 +1,23 @@
 const express = require('express');
 const path = require('path');
 const router = express.Router();
-const { execSync } = require('child_process');
 
-/* GET home page. */
-router.get('/', function(req, res) {
-  res.sendFile(path.resolve(__dirname, '../../public/index.html'));
+// TODO: Move this to notify after being done with /test
+const admin = require('firebase-admin');
+const serviceAccount = require('../../private/waspserver-firebase.json');
+
+admin.initializeApp( {
+	credential: admin.credential.cert(serviceAccount),
+	databaseURL: "https://waspserver-saii.firebaseio.com"
 });
 
-router.get('/login', function(req, res) {
-	res.sendFile(path.resolve(__dirname, '../../public/login.html'));
-});
+const notify = require('./notify');
+router.use('/notify', notify);
 
-router.get('/test', function(req, res){
-  if (req.user) {
-	  res.send("Logged in as: "+req.user.username);
-  }else {
-	  res.send("Not logged in");
-  }
-});
+const test = require('./test');
+router.use('/test', test);
 
-router.get('/testCI', function(req, res) {
-	const commitLog = execSync('git log -n 1').toString('utf8');
-	res.send(commitLog);
-});
+const files = require('./files');
+router.use('/files', files);
 
 module.exports = router;

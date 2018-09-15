@@ -1,27 +1,25 @@
 {
-  "name": "raspberry",
+  "name": "waspserver",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
     "compression": "^1.7.3",
     "express": "~4.16.0",
     "express-session": "^1.15.6",
+    "firebase-admin": "^6.0.0",
     "jsonfile": "^5.0.0",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "session-file-store": "^1.2.0"
   },
-  "devDependencies": {
-    "gulp": "^4.0.0",
-    "gulp-nodemon": "^2.2.1",
-    "gulp-scp2": "^0.2.0",
-    "gulp-ssh": "^0.7.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Anarch1st/WaspServer.git"
-  },
+  "repository": "git+https://github.com/Anarch1st/WaspServer.git",
   "author": "Saii",
   "license": "ISC",
-  "homepage": "https://github.com/Anarch1st/WaspServer#readme"
+  "homepage": "https://github.com/Anarch1st/WaspServer#readme",
+  "description": "Nodejs server for Raspberry",
+  "main": "server/app.js",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-nodemon": "^2.2.1"
+  }
 }
