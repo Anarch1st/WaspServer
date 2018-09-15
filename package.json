@@ -13,9 +13,7 @@
   },
   "devDependencies": {
     "gulp": "^4.0.0",
-    "gulp-nodemon": "^2.2.1",
-    "gulp-scp2": "^0.2.0",
-    "gulp-ssh": "^0.7.0"
+    "gulp-nodemon": "^2.2.1"
   },
   "repository": {
     "type": "git",
