@@ -18,7 +18,7 @@ export class FileList extends PolymerElement {
   static get template() {
     return html`
     <div>${this.headerTemplate}</div>
-    <span id="list"></span>
+    <div id='outerDiv'></div>
     <div>${this.footerTemplate}</div>
 
     <iron-ajax id="fileList"
@@ -32,7 +32,7 @@ export class FileList extends PolymerElement {
     return {
       basePath: {
         type: String,
-        value: ""
+        value: "/"
       },
       _resources: {
         type: Object,
@@ -60,22 +60,28 @@ export class FileList extends PolymerElement {
   }
 
   _fileListUpdated() {
-    var htmlElements = [];
-    for (var val of this.fileList) {
-      htmlElements.push('')
-    }
-    string = string.substring(5, string.length-1);
+    var outerDiv = this.$.outerDiv;
 
-    this.$.list.innerText = string;
+    outerDiv.innerHTML = "";
+
+    for (var val of this.fileList) {
+      outerDiv.append(this._getHTMLElement(val));
+    }
   }
 
   _getHTMLElement(name) {
-    return '<div>'+name+'</div>';
+    var div = document.createElement("div");
+    var t = document.createTextNode(name);
+    div.append(t);
+    div.addEventListener('click', function(e){
+      const newPath = this.basePath+e.srcElement.innerText+'/';
+      this.set('basePath', newPath);
+    }.bind(this));
+    return div;
   }
 
   handleResponse(data) {
-    console.log(data.detail.response);
-    this.set('fileList', data.detail.response);
+    this.set('fileList', this._resources.func.parseResponse(data.detail.response));
   }
 
   handleError(err) {
