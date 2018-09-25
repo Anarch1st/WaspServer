@@ -1,5 +1,6 @@
 import {PolymerElement, html} from '../assets/@polymer/polymer/polymer-element.js';
 import '../assets/@polymer/iron-ajax/iron-ajax.js';
+import '../assets/@polymer/paper-button/paper-button.js';
 // import './res.js';
 
 export class FileList extends PolymerElement {
@@ -12,7 +13,12 @@ export class FileList extends PolymerElement {
   }
 
   static get footerTemplate() {
-    return html`<div>-----------------------------------------------------------------------------------</div>`;
+    return html`<div>-----------------------------------------------------------------------------------</div>
+      <form action="/files/upload" method="post" enctype="multipart/form-data">
+      <input id="uploadPath" type="hidden" name="path">
+      <input type="file" name="file">
+      <input type="submit">
+      </form>`;
   }
 
   static get template() {
@@ -74,9 +80,9 @@ export class FileList extends PolymerElement {
     } else {
       xhr = this.$.fileList;
     }
-    xhr.url = this._resources.urls.GET_BASE_FILE_URL+
-    this._resources.getUrlFromRoute(this.route);
-    console.log(xhr.url);
+
+    this.$.uploadPath.value = this._resources.getUrlFromRoute(this.route);
+    xhr.url = this._resources.urls.GET_BASE_FILE_URL+this._resources.getUrlFromRoute(this.route);
     xhr.generateRequest();
   }
 

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
 
 var basePath;
 if(process.env.NODE_ENV === "production") {
@@ -10,27 +11,42 @@ if(process.env.NODE_ENV === "production") {
   basePath = '/home/saii';
 }
 
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, basePath+ '/'+req.body.path);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+})
+
+var upload = multer( {storage: storage} );
+
+router.post('/upload', upload.single('file'), function(req, res) {
+  res.end();
+})
+
 router.get('/video', function(req, res) {
   let filePath = req.session.videoPath;
 
-  const stat = fs.statSync(filePath)
-  const fileSize = stat.size
-  const range = req.headers.range
+  const stat = fs.statSync(filePath);
+  const fileSize = stat.size;
+  const range = req.headers.range;
 
   if (range) {
-    const parts = range.replace(/bytes=/, "").split("-")
-    const start = parseInt(parts[0], 10)
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10);
     const end = parts[1]
       ? parseInt(parts[1], 10)
       : fileSize-1
-    const chunksize = (end-start)+1
-    const file = fs.createReadStream(filePath, {start, end})
+    const chunksize = (end-start)+1;
+    const file = fs.createReadStream(filePath, {start, end});
     const head = {
       'Content-Range': `bytes ${start}-${end}/${fileSize}`,
       'Accept-Ranges': 'bytes',
       'Content-Length': chunksize,
       'Content-Type': 'video/mp4',
-    }
+    };
 
     res.writeHead(206, head);
     file.pipe(res);
@@ -45,7 +61,7 @@ router.get('/video', function(req, res) {
 });
 
 router.get('/get/*', function(req, res) {
-  let filePath = basePath + req.url.substring(4);
+  let filePath = basePath + decodeURI(req.url.substring(4));
   const pathStat = fs.statSync(filePath);
 
   if(pathStat.isFile()) {
@@ -95,6 +111,8 @@ router.get('/get/*', function(req, res) {
     });
   }
 });
+
+// router.post()
 
 router.get('/explore', function(req, res) {
   res.sendFile(path.join(__dirname, '../../public/files/explore.html'));
