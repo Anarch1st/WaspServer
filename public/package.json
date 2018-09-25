@@ -9,6 +9,10 @@
   },
   "dependencies": {
     "@polymer/iron-ajax": "^3.0.1",
+    "@polymer/paper-button": "^3.0.1",
     "@polymer/polymer": "^3.0.5"
+  },
+  "scripts": {
+    "postinstall": "empathy install"
   }
 }
