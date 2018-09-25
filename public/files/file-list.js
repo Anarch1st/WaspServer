@@ -8,7 +8,7 @@ export class FileList extends PolymerElement {
   }
 
   static get headerTemplate() {
-    return html`<h1>{{basePath}}</h1>`;
+    return html`<h1>{{selectedFile.name}}</h1>`;
   }
 
   static get footerTemplate() {
@@ -35,40 +35,49 @@ export class FileList extends PolymerElement {
         </iron-ajax>
     <iron-ajax id="file"
         on-response="handleFile"
+        handle-as = "text"
         on-error="handleError">
         </iron-ajax>`;
   }
 
   static get properties() {
     return {
-      basePath: {
-        type: String,
-        value: "/"
-      },
       _resources: {
         type: Object,
         value: URLs
       },
-      fileURL: {
-        type: String,
-        computed: '_fileUrlChanged(basePath)',
-        observer: '_fetch'
-      },
       fileList: {
         type: Array,
         observer: '_fileListUpdated'
+      },
+      selectedFile: {
+        type: Object,
+        value: {'isFile': false},
+        observer: '_fileSelected'
+      },
+      route: {
+        type: Array
       }
     }
   }
 
-  _fileUrlChanged(path) {
-    return this._resources.urls.GET_BASE_FILE_URL+this.basePath;
-  }
+  _fileSelected() {
+    if (this.selectedFile && this.selectedFile.name) {
+      this.route.push(this.selectedFile.name);
+    } else {
+      this.route = [];
+    }
 
-  _fetch() {
-    console.log(this.fileList);
-    this.$.fileList.url = this.fileURL;
-    this.$.fileList.generateRequest();
+    var xhr = null;
+    if (this.selectedFile.isFile) {
+      xhr = this.$.file;
+    } else {
+      xhr = this.$.fileList;
+    }
+    xhr.url = this._resources.urls.GET_BASE_FILE_URL+
+    this._resources.getUrlFromRoute(this.route);
+    console.log(xhr.url);
+    xhr.generateRequest();
   }
 
   _fileListUpdated() {
@@ -87,9 +96,8 @@ export class FileList extends PolymerElement {
     div.classList.add(obj.isFile?'file':'dir');
     div.append(t);
     div.addEventListener('click', function(e){
-      const newPath = this.basePath+e.srcElement.innerText+'/';
-      obj.isSelected = true;
-      this.set('basePath', newPath);
+      this.set('selectedFile', obj);
+      console.log(this.selectedFile);
     }.bind(this));
     return div;
   }
@@ -104,7 +112,6 @@ export class FileList extends PolymerElement {
 
   handleFile(data) {
     var outerDiv = this.$.outerDiv;
-
     outerDiv.innerHTML = data.detail.response;
   }
 }
