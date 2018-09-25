@@ -17,15 +17,26 @@ export class FileList extends PolymerElement {
 
   static get template() {
     return html`
+    <style>
+      .file {
+        color: blue;
+      }
+      .dir {
+        color: red;
+      }
+    </style>
     <div>${this.headerTemplate}</div>
     <div id='outerDiv'></div>
     <div>${this.footerTemplate}</div>
 
     <iron-ajax id="fileList"
-        on-response="handleResponse"
+        on-response="handleFilesList"
+        on-error="handleError">
+        </iron-ajax>
+    <iron-ajax id="file"
+        on-response="handleFile"
         on-error="handleError">
         </iron-ajax>`;
-
   }
 
   static get properties() {
@@ -41,7 +52,7 @@ export class FileList extends PolymerElement {
       fileURL: {
         type: String,
         computed: '_fileUrlChanged(basePath)',
-        observer: '_fetchFileList'
+        observer: '_fetch'
       },
       fileList: {
         type: Array,
@@ -54,7 +65,8 @@ export class FileList extends PolymerElement {
     return this._resources.urls.GET_BASE_FILE_URL+this.basePath;
   }
 
-  _fetchFileList() {
+  _fetch() {
+    console.log(this.fileList);
     this.$.fileList.url = this.fileURL;
     this.$.fileList.generateRequest();
   }
@@ -69,27 +81,31 @@ export class FileList extends PolymerElement {
     }
   }
 
-  _getHTMLElement(name) {
+  _getHTMLElement(obj) {
     var div = document.createElement("div");
-    var t = document.createTextNode(name);
+    var t = document.createTextNode(obj.name);
+    div.classList.add(obj.isFile?'file':'dir');
     div.append(t);
     div.addEventListener('click', function(e){
       const newPath = this.basePath+e.srcElement.innerText+'/';
+      obj.isSelected = true;
       this.set('basePath', newPath);
     }.bind(this));
     return div;
   }
 
-  handleResponse(data) {
-    this.set('fileList', this._resources.func.parseResponse(data.detail.response));
+  handleFilesList(data) {
+    this.set('fileList', this._resources.parseResponse(data.detail.response));
   }
 
   handleError(err) {
     console.log(err);
   }
 
-  populateFileList() {
+  handleFile(data) {
+    var outerDiv = this.$.outerDiv;
 
+    outerDiv.innerHTML = data.detail.response;
   }
 }
 customElements.define('file-list', FileList)

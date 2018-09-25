@@ -12,7 +12,18 @@ if(process.env.NODE_ENV === "production") {
 
 router.get('/get/*', function(req, res) {
   let path = basePath + req.url.substring(4);
+  const pathStat = fs.statSync(path);
 
+  if(pathStat.isFile()) {
+    fs.readFile(path, function(err, data) {
+      if (err) {
+        res.send(err);
+      } else {
+        res.send(data);
+      }
+      return;
+    });
+  }
   fs.readdir(path, function(err, files) {
 
     if (err) {
@@ -20,7 +31,24 @@ router.get('/get/*', function(req, res) {
       delete err.path;
       res.send(err);
     } else {
-      res.send(files);
+      var obj = [];
+
+      for (var file of files) {
+        const stat = fs.statSync(path+'/'+file);
+        obj.push({
+          'name': file,
+          'isFile': stat.isFile(),
+          'size' : stat.size,
+          'times' : {
+            'birth' : stat.birthtime,
+            'access' : stat.atime,
+            'modify' : stat.mtime,
+            'change' : stat.ctime
+          },
+          'userId' : stat.uid
+        });
+      };
+      res.send(obj);
     }
   });
 });
