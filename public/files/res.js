@@ -19,7 +19,8 @@ let URLs = (function() {
   }
   return {
     urls: {
-      GET_BASE_FILE_URL: '/files/get/'
+      GET_BASE_FILE_URL: '/files/get/',
+      GET_FILE_UPLOAD_URL: '/files/upload'
     },
     parseResponse: parseResponse,
     getUrlFromRoute: getUrlFromRoute
