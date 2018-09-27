@@ -3,6 +3,7 @@ const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const { exec } = require('child_process');
 
 var basePath;
 if(process.env.NODE_ENV === "production") {
@@ -27,9 +28,14 @@ router.post('/upload', upload.single('file'), function(req, res) {
 })
 
 router.get('/video', function(req, res) {
-  let filePath = req.session.videoPath;
+  let filePath = req.session.filePath;
 
-  const stat = fs.statSync(filePath);
+  var stat;
+  try {
+    stat = fs.statSync(filePath);
+  } catch (e) {
+    console.log(e);
+  }
   const fileSize = stat.size;
   const range = req.headers.range;
 
@@ -60,6 +66,15 @@ router.get('/video', function(req, res) {
   }
 });
 
+router.get('/file', function(req, res) {
+  let filePath = req.session.filePath;
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      res.send(err);
+    }
+  });
+});
+
 router.get('/get/*', function(req, res) {
   let filePath = basePath + decodeURI(req.url.substring(4));
   const pathStat = fs.statSync(filePath);
@@ -69,16 +84,12 @@ router.get('/get/*', function(req, res) {
       if (err) {
         res.send('Insufficient Read permission');
       } else {
-        if (path.extname(filePath) === '.mp4') {
-          req.session.videoPath = filePath;
-          res.redirect('/video.html');
-        } else {
-          res.sendFile(path, (err) => {
-            if (err) {
-              res.send(err);
-            }
-          });
-        }
+        req.session.filePath = filePath;
+
+        exec('file -b -i '+filePath, function(err, stdout, stderr){
+          const parts = stdout.split(';');
+          res.send({'mime': parts[0], 'encoding': parts[1].substring(1,parts[1].length-1)});
+        });
         return;
       }
     });
