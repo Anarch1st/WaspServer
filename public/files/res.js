@@ -20,7 +20,10 @@ let URLs = (function() {
   return {
     urls: {
       GET_BASE_FILE_URL: '/files/get/',
-      GET_FILE_UPLOAD_URL: '/files/upload'
+      GET_FILE_UPLOAD_URL: '/files/upload',
+
+      GET_VIDEO_FILE: '/files/video',
+      GET_FILE: '/files/file'
     },
     parseResponse: parseResponse,
     getUrlFromRoute: getUrlFromRoute
