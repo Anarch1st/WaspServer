@@ -17,7 +17,7 @@ const sessionOptions = {
 	secret: "WaspberrySpeaking",
 	resave: false,
 	saveUninitialized: false,
-	cookie: {}
+	cookie: {maxAge: '900000'}
 };
 
 if(process.env.NODE_ENV === "production") {
@@ -98,7 +98,8 @@ app.get('/profile',optionalAuth, function(req, res){
 });
 
 app.use("*", function(req, res, next) {
-	console.log(req.ip+"\t"+(req.hasOwnProperty('user'))+"\t"+req.originalUrl);
+	const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+	console.log(ip+"\t"+(req.hasOwnProperty('user'))+"\t"+req.originalUrl);
 	next();
 });
 

@@ -16,19 +16,6 @@ router.get('/CI', function(req, res) {
 	res.send(commitLog);
 });
 
-router.get('/firebase', function(req, res) {
-	const admin = require('firebase-admin');
-
-	var db = admin.database();
-	var ref = db.ref('notifications/mobile');
-
-	ref.on('value', function(snapshot) {
-			res.send(snapshot.val());
-		}, function(errorObj) {
-			res.send(errorObj.code);
-	});
-
-});
 
 
 module.exports = router;
