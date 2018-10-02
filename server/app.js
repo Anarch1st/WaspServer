@@ -17,7 +17,7 @@ const sessionOptions = {
 	secret: "WaspberrySpeaking",
 	resave: false,
 	saveUninitialized: false,
-	cookie: {maxAge: '900000'}
+	cookie: {maxAge: 900000}
 };
 
 if(process.env.NODE_ENV === "production") {
