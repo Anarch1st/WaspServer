@@ -16,8 +16,23 @@ router.post('/register', function(req, res) {
 	jsonfile.readFile(tokens, function(err, obj) {
 		const source = req.body.source;
 		const token = req.body.token;
-		obj.push({source: source,
-							token: token});
+
+		console.log(req.body);
+		var temp = null;
+		if (obj.length > 0) {
+			for (var item in obj) {
+				if (obj[item].source === source) {
+					temp = obj[item];
+					break;
+				}
+			}
+		}
+		if (temp) {
+			temp.token = token;
+		} else {
+			obj.push({source: source,
+								token: token});
+		}
 
 		jsonfile.writeFile(tokens, obj, function(err) {
 			if (err) {

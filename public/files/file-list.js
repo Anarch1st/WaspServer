@@ -89,6 +89,9 @@ export class FileList extends PolymerElement {
         margin-left: 40px;
         visibility: hidden;
       }
+      embed {
+        background-color: #EEEEEE;
+      }
     </style>
     <div id='headerTemplate'>${this.headerTemplate}</div>
     <div id='outerDiv'></div>
@@ -122,6 +125,10 @@ export class FileList extends PolymerElement {
       route: {
         type: Array,
         value: []
+      },
+      videoTags: {
+        type: Array,
+        value: ['video/mp4', 'video/webm', 'video/ogg']
       }
     }
   }
@@ -149,7 +156,7 @@ export class FileList extends PolymerElement {
 
     const url = this._resources.getUrlFromRoute(this.route);
     this.$.uploadPath.value = url;
-    xhr.url = this._resources.urls.GET_BASE_FILE_URL+ url;
+    xhr.url = this._resources.urls.GET_BASE_FILE_URL + url;
     xhr.generateRequest();
   }
 
@@ -184,40 +191,37 @@ export class FileList extends PolymerElement {
   }
 
   handleFile(data) {
-    const mimeType = data.detail.response;
-    console.log(mimeType.mime);
+    const info = data.detail.response;
+    console.log(info.mime);
     var outerDiv = this.$.outerDiv;
 
     outerDiv.innerHTML = "";
 
-    if (mimeType === null || mimeType.mime === null || mimeType.mime === false) {
+    if (info === null || info.mime === null || info.mime === false) {
       console.log('invalid');
       return;
     }
 
-    switch (mimeType.mime.split('/')[0]) {
-      case 'video':
-        var src = document.createElement('source');
-        src.setAttribute('src', this._resources.urls.GET_VIDEO_FILE);
-        src.setAttribute('controls', '');
-        src.setAttribute('type', mimeType.mime);
+    const url = this._resources.urls.GET_FILE + this._resources.getUrlFromRoute(this.route);
 
-        var player = document.createElement('video');
-        player.setAttribute('controls', '');
-        player.append(src);
+    if (this.videoTags.includes(info.mime)) {
+      var src = document.createElement('source');
+      src.setAttribute('src', url);
+      src.setAttribute('type', info.mime);
 
-        outerDiv.append(player);
-        break;
-      default:
-        var embed = document.createElement('embed');
-        embed.setAttribute('src', this._resources.urls.GET_FILE);
-        embed.setAttribute('width', this.$.headerTemplate.clientWidth-50);
-        embed.setAttribute('height', window.innerHeight -
-            this.$.headerTemplate.clientHeight - this.$.footerTemplate.clientHeight);
-        outerDiv.append(embed);
+      var player = document.createElement('video');
+      player.setAttribute('controls', 'controls');
+      player.append(src);
+
+      outerDiv.append(player);
+    } else {
+      var embed = document.createElement('embed');
+      embed.setAttribute('src', url);
+      embed.setAttribute('width', info.width || this.$.headerTemplate.clientWidth-50);
+      embed.setAttribute('height', info.height || window.innerHeight -
+          this.$.headerTemplate.clientHeight - this.$.footerTemplate.clientHeight);
+      outerDiv.append(embed);
     }
-
-    // outerDiv.innerHTML = data.detail.response;
   }
 }
 customElements.define('file-list', FileList)

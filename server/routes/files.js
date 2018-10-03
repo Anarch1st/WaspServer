@@ -3,6 +3,7 @@ const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const sizeOf = require('image-size');
 const { exec } = require('child_process');
 
 var basePath;
@@ -27,8 +28,8 @@ router.post('/upload', upload.single('file'), function(req, res) {
   res.end();
 })
 
-router.get('/video', function(req, res) {
-  let filePath = req.session.filePath;
+router.get('/video/*', function(req, res) {
+  let filePath = basePath + decodeURI(req.url.substring(6));
 
   var stat;
   try {
@@ -66,13 +67,20 @@ router.get('/video', function(req, res) {
   }
 });
 
-router.get('/file', function(req, res) {
-  let filePath = req.session.filePath;
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      res.send(err);
-    }
+router.get('/getFile/*', function(req, res) {
+  let filePath = basePath + decodeURI(req.url.substring(8));
+
+  exec('file -b -i '+filePath, function(err, stdout, stderr){
+    const parts = stdout.split(';');
+    // res.setHeader('Content-Type', parts[0]);
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        console.log(err);
+      }
+    });
+
   });
+
 });
 
 router.get('/get/*', function(req, res) {
@@ -84,11 +92,18 @@ router.get('/get/*', function(req, res) {
       if (err) {
         res.send('Insufficient Read permission');
       } else {
-        req.session.filePath = filePath;
-
         exec('file -b -i '+filePath, function(err, stdout, stderr){
           const parts = stdout.split(';');
-          res.send({'mime': parts[0], 'encoding': parts[1].substring(1,parts[1].length-1)});
+          var sendObj = {'mime': parts[0], 'encoding': parts[1].substring(1,parts[1].length-1)};
+          console.log(parts[0]);
+          console.log(parts[0].split('/')[0]);
+          if (parts[0].split('/')[0] === 'image') {
+            const dim = sizeOf(filePath);
+            console.log(dim);
+            sendObj.width = dim.width;
+            sendObj.height = dim.height;
+          }
+          res.send(sendObj);
         });
         return;
       }
