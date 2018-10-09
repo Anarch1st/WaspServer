@@ -23,7 +23,8 @@ let URLs = (function() {
       GET_FILE_UPLOAD_URL: '/files/upload',
 
       // GET_VIDEO_FILE: '/files/video',
-      GET_FILE: '/files/getFile/'
+      GET_FILE: '/files/getFile/',
+      NEW_FOLDER: '/files/create/'
     },
     parseResponse: parseResponse,
     getUrlFromRoute: getUrlFromRoute

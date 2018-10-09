@@ -95,11 +95,8 @@ router.get('/get/*', function(req, res) {
         exec('file -b -i '+filePath, function(err, stdout, stderr){
           const parts = stdout.split(';');
           var sendObj = {'mime': parts[0], 'encoding': parts[1].substring(1,parts[1].length-1)};
-          console.log(parts[0]);
-          console.log(parts[0].split('/')[0]);
           if (parts[0].split('/')[0] === 'image') {
             const dim = sizeOf(filePath);
-            console.log(dim);
             sendObj.width = dim.width;
             sendObj.height = dim.height;
           }
@@ -111,7 +108,6 @@ router.get('/get/*', function(req, res) {
   } else {
     fs.readdir(filePath, function(err, files) {
       if (err) {
-        console.log(err.path);
         delete err.path;
         res.send(err);
       } else {
@@ -144,7 +140,17 @@ router.get('/get/*', function(req, res) {
   }
 });
 
-// router.post()
+router.get('/create/*', function(req, res) {
+  let filePath = basePath + decodeURI(req.url.substring(4));
+
+  fs.mkdir(filePath, (err) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send("Success");
+    }
+  })
+});
 
 router.get('/explore', function(req, res) {
   res.sendFile(path.join(__dirname, '../../public/files/explore.html'));
