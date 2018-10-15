@@ -27,6 +27,15 @@ if(process.env.NODE_ENV === "production") {
 	sessionOptions.cookie.secure = true;
 	sessionOptions.store = new FileStore();
 	app.use(require('compression')());
+
+	app.use(function(req, res, next) {
+		const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+		if (!req.session.returning) {
+			req.session.returning = true;
+			request.post('http://localhost:8010/notify/zuk', {form:{title:'New Session', body: ip}});
+		}
+		next();
+	});
 }
 
 app.use(express.json());
@@ -34,16 +43,6 @@ app.use(session(sessionOptions));
 app.use(express.urlencoded({ extended: true }));
 // app.use('/node_modules', express.static(path.join(__dirname, '../node_modules')));
 app.use('/',express.static(path.join(__dirname, '../public')));
-
-app.use(function(req, res, next) {
-	const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-	if (!req.session.returning) {
-		req.session.returning = true;
-		request.post('http://localhost:8010/notify/zuk', {form:{title:'New Session', body: ip}});
-	}
-
-	next();
-});
 
 passport.use(new LocalStrategy(function(username, password, done){
 	Users.findByUsername(username, password, done);
