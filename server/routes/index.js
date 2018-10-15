@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const request = require('sync-request');
 const router = express.Router();
 const httpProxy = require('http-proxy');
 const proxy = httpProxy.createProxyServer();
