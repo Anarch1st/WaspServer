@@ -3,7 +3,7 @@ Nodejs server for Raspberry
 
 ### Get the source code
 ```bash
-$ git clone git@github.com:Anarch1st/WaspServer.git
+$ git clone git@github.com:Saii626/WaspServer.git
 $ cd WaspServer
 ```
 
