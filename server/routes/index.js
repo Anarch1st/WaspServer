@@ -4,6 +4,14 @@ const router = express.Router();
 const httpProxy = require('http-proxy');
 const proxy = httpProxy.createProxyServer();
 
+proxy.on('proxyReq', function(proxyReq, req, res, options) {
+  if (req.body) {
+    let bodyData = JSON.stringify(req.body);
+    proxyReq.setHeader('Content-Type','application/json');
+    proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+    proxyReq.write(bodyData);
+  }
+});
 
 var microserviceDB = [];
 
