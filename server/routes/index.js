@@ -2,15 +2,35 @@ const express = require('express');
 const path = require('path');
 const router = express.Router();
 const httpProxy = require('http-proxy');
+const multer = require('multer');
 const proxy = httpProxy.createProxyServer();
+
+if(process.env.NODE_ENV === "production") {
+  basePath = '/media/pi/PartA/temp';
+}else {
+  basePath = '/home/saii/temp';
+}
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, basePath);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+})
+
+var upload = multer( {storage: storage} );
 
 proxy.on('proxyReq', function(proxyReq, req, res, options) {
   if (req.body) {
+    // console.log(req.body);
     let bodyData = JSON.stringify(req.body);
     proxyReq.setHeader('Content-Type','application/json');
     proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
     proxyReq.write(bodyData);
   }
+
 });
 
 var microserviceDB = [];
@@ -89,9 +109,23 @@ router.use('/', function(req, res) {
       if (headerUser) {
         delete headerUser.password;
       }
-      proxy.web(req, res, {target: service.redirect, headers: {user: JSON.stringify(headerUser) || "Anonymous"}}, function(err) {
-        console.log(service.name+" error: "+err);
-      });
+
+      if (req.headers['content-type'] && req.headers['content-type'].split(' ')[0]==='multipart/form-data;') {
+        upload.array('files')(req, res, function(err) {
+          if (err) {
+            console.log(err);
+          } else {
+            req.body.files = req.files;
+            proxy.web(req, res, {target: service.redirect, headers: {user: JSON.stringify(headerUser) || "Anonymous"}}, function(err) {
+              console.log(service.name+" error: "+err);
+            });
+          }
+        });
+      }else {
+        proxy.web(req, res, {target: service.redirect, headers: {user: JSON.stringify(headerUser) || "Anonymous"}}, function(err) {
+          console.log(service.name+" error: "+err);
+        });
+      }
       break;
     }
   }
