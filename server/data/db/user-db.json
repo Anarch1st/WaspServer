@@ -1,8 +1,3 @@
-[
-	{
-		"id": 1,
-		"username": "Saii",
-		"password": "edbe44bcf6ab949eed65800c76cad7b4",
-		"roles": ["User", "Admin"]
-	}
-]
+{
+  "users": []
+}

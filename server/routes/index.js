@@ -5,28 +5,30 @@ const httpProxy = require('http-proxy');
 const multer = require('multer');
 const proxy = httpProxy.createProxyServer();
 
-if(process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === "production") {
   basePath = '/media/pi/PartA/temp';
-}else {
+} else {
   basePath = '/home/saii/temp';
 }
 
 var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination: function(req, file, cb) {
     cb(null, basePath);
   },
-  filename: function (req, file, cb) {
+  filename: function(req, file, cb) {
     cb(null, file.originalname);
   }
 })
 
-var upload = multer( {storage: storage} );
+var upload = multer({
+  storage: storage
+});
 
 proxy.on('proxyReq', function(proxyReq, req, res, options) {
   if (req.body) {
     // console.log(req.body);
     let bodyData = JSON.stringify(req.body);
-    proxyReq.setHeader('Content-Type','application/json');
+    proxyReq.setHeader('Content-Type', 'application/json');
     proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
     proxyReq.write(bodyData);
   }
@@ -50,11 +52,11 @@ router.post('/register', function(req, res) {
     }
   }
   microserviceDB.push({
-              path: mountPath,
-              redirect: proxyIP,
-              name: name,
-              enabled: true
-            });
+    path: mountPath,
+    redirect: proxyIP,
+    name: name,
+    enabled: true
+  });
   res.status(200);
   res.end();
   return;
@@ -69,7 +71,7 @@ router.get('/enable/:name', function(req, res) {
   for (var service of microserviceDB) {
     if (service.name === req.params.name) {
       service.enabled = true;
-      res.send("Enabled "+service.name);
+      res.send("Enabled " + service.name);
       return;
     }
   }
@@ -77,7 +79,7 @@ router.get('/enable/:name', function(req, res) {
 });
 
 router.get('/disable/:name', function(req, res) {
-  if(!req.user) {
+  if (!req.user) {
     res.status(401);
     res.send("Login to enable/disable services");
     return;
@@ -85,7 +87,7 @@ router.get('/disable/:name', function(req, res) {
   for (var service of microserviceDB) {
     if (service.name === req.params.name) {
       service.enabled = false;
-      res.send("Disabled "+service.name);
+      res.send("Disabled " + service.name);
       return;
     }
   }
@@ -100,30 +102,37 @@ router.use('/', function(req, res) {
   }
 
   var isFound = false;
-  for(var service of microserviceDB) {
+  for (var service of microserviceDB) {
     if (service.path === pathRoute[1] && service.enabled) {
-      console.log("Using service "+service.name);
+      console.log("Using service " + service.name);
       isFound = true;
-      req.url = req.url.substring(pathRoute[1].length+1);
-      var headerUser = req.user;
-      if (headerUser) {
-        delete headerUser.password;
+      req.url = req.url.substring(pathRoute[1].length + 1);
+
+      let headers = {
+        isSecure: (process.env.NODE_ENV !== "production" || req.isLocal() || req.user) ? true : false,
+        roles: req.user ? JSON.stringify(user.roles) : '[]'
       }
 
-      if (req.headers['content-type'] && req.headers['content-type'].split(' ')[0]==='multipart/form-data;') {
+      if (req.headers['content-type'] && req.headers['content-type'].split(' ')[0] === 'multipart/form-data;') {
         upload.array('files')(req, res, function(err) {
           if (err) {
             console.log(err);
           } else {
             req.body.files = req.files;
-            proxy.web(req, res, {target: service.redirect, headers: {user: JSON.stringify(headerUser) || "Anonymous"}}, function(err) {
-              console.log(service.name+" error: "+err);
+            proxy.web(req, res, {
+              target: service.redirect,
+              headers: headers
+            }, function(err) {
+              console.log(service.name + " error: " + err);
             });
           }
         });
-      }else {
-        proxy.web(req, res, {target: service.redirect, headers: {user: JSON.stringify(headerUser) || "Anonymous"}}, function(err) {
-          console.log(service.name+" error: "+err);
+      } else {
+        proxy.web(req, res, {
+          target: service.redirect,
+          headers: headers
+        }, function(err) {
+          console.log(service.name + " error: " + err);
         });
       }
       break;
