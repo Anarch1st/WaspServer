@@ -1,10 +1,10 @@
-# WaspServer
-Nodejs server for Raspberry
+# AuthServer
+Nodejs server for Raspberry. This micro-service maintains sessions and authentication. Adds 'User' header to request, to be used by other micro-services to verify a user. Will added more capability and certain level control over other micro-services in the future.
 
 ### Get the source code
 ```bash
-$ git clone git@github.com:Saii626/WaspServer.git
-$ cd WaspServer
+$ git clone git@github.com:Saii626/AuthServer.git
+$ cd AuthServer
 ```
 
 ### Global dependencies
@@ -22,25 +22,6 @@ $ npm install
 
 ### Run the application
 ```bash
-$ node server/waspserver
+$ node server/authserver
 Server started on port: 8000
-```
-
-### Register and mount a microservice
-Perform a post request. This will redirect all requests `http://localhost:8080/mount_path/*` to `http://server_ip/*`.
-```javascript
-const form = {
-    name: 'name_of_the_service',
-    path: 'mount_path',
-    ip: 'server_ip'
-};
-request.post('http://localhost:8000/register', {form: form});
-```
-
-
-### Enable/Disable a microservice
-Perform a get request. User must be logged in to perform these.
-```javascript
-request.get('http://localhost:8000/enable/service') // Will enable sevice
-request.get('http://localhost:8000/disable/service') // Will disable sevice
 ```

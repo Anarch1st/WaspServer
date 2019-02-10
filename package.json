@@ -1,5 +1,5 @@
 {
-  "name": "waspserver",
+  "name": "authserver",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
@@ -13,12 +13,12 @@
     "pg": "^7.8.0",
     "request": "^2.88.0"
   },
-  "repository": "git+https://github.com/Saii626/WaspServer.git",
+  "repository": "git+https://github.com/Saii626/AuthServer.git",
   "author": "Saii",
   "license": "ISC",
-  "homepage": "https://github.com/Saii626/WaspServer#readme",
+  "homepage": "https://github.com/Saii626/AuthServer#readme",
   "description": "Nodejs server for Raspberry",
-  "main": "server/waspserver.js",
+  "main": "server/authserver.js",
   "devDependencies": {
     "nodemon": "^1.18.9"
   },
@@ -26,13 +26,12 @@
     "verbose": true,
     "ignore": [
       "public/*",
-      "node_modules/*",
-      "server/data/db/*"
+      "node_modules/*"
     ],
     "events": {
-      "start": "notify-send WaspServer \"Server started\"",
-      "crash": "notify-send WaspServer \"Server crashed\"",
-      "exit": "notify-send WaspServer \"Server stopped\""
+      "start": "notify-send AuthServer \"Server started\"",
+      "crash": "notify-send AuthServer \"Server crashed\"",
+      "exit": "notify-send AuthServer \"Server stopped\""
     }
   }
 }
