@@ -17,7 +17,7 @@ class UserService {
   findByUsername(username, cb) {
     userRepo.queryUserByName(username)
       .then((res) => {
-        if (res.rows && res.rows[0] && Object.keys(res.rows).length > 0) {
+        if (res.rows && res.rows[0] && Object.keys(res.rows[0]).length > 0) {
           let user = new User(res.rows[0]);
           debug('User Found %O', user);
           userCache.set(user.id, user);
