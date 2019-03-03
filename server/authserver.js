@@ -59,6 +59,16 @@ app.get('/login', function (req, res) {
   res.sendFile(path.resolve(__dirname, '../public/login.html'));
 });
 
+// TODO: Use wrapped async function
+/**
+    app.get('*', wrap(async function(req, res) {...}
+
+    function wrap(fn) {
+      return function(req, res) {
+        fn(req, res).then(returnVal => res.send(returnVal)).catch(next);
+      };
+    }
+ */
 app.post('/login', (req, res) => {
   let {
     username,
@@ -109,6 +119,7 @@ app.get('/logout', function (req, res) {
   }
 });
 
+// NOTE: Internal API
 app.get('/auth', (req, res) => {
   res.status(200);
 
@@ -173,6 +184,29 @@ app.get('/user/:id', (req, res) => {
     debug('Untrusted user');
     res.status(401);
     res.end();
+  }
+});
+
+
+app.get('/getLoggedInUser', (req, res) => {
+  if (req.session.userId) {
+    userService.findById(req.session.userId, (err, user) => {
+      if (!err) {
+        res.send({
+          status: 'success',
+          id: req.session.userId
+        });
+      } else {
+        res.send({
+          status: 'error'
+        });
+      }
+    });
+  } else {
+    res.send({
+      status: 'success',
+      id: null
+    });
   }
 });
 
